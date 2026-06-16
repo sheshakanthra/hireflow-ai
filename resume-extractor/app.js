@@ -480,7 +480,7 @@ analyzeBtn.addEventListener('click', async () => {
 
   const key = apiKey();
   if (!key || key === 'YOUR_GROQ_API_KEY_HERE') {
-    showError('No API key found. Set GROQ_API_KEY in app.js and get a key at console.groq.com/keys.');
+    showToast('API Key Required', 'Go to Preferences → Account and add your Groq API key to start analyzing resumes.', 'warning');
     return;
   }
 
