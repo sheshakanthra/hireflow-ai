@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireFlow AI</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-mode">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-box">
+          <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+            <circle cx="12" cy="8" r="3.5" fill="white" opacity="0.9"/>
+            <circle cx="24" cy="8" r="3.5" fill="white" opacity="0.9"/>
+            <path d="M12 13v10M12 23l-4 4M12 23l4 4" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+            <path d="M24 13v10M24 23l-4 4M24 23l4 4" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+            <path d="M14 16c2-3 6-3 8 0" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+            <path d="M22 16l3-2M22 16l2 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+          </svg>
+        </div>
+        <span class="logo-text">HireFlow <span class="logo-ai">AI</span></span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="nav-item active" data-target="dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="#resumes" class="nav-item" data-target="resumes"><i class="ti ti-file-text"></i> Resumes</a>
+        <a href="#candidates" class="nav-item" data-target="candidates"><i class="ti ti-users"></i> Candidates</a>
+        <a href="#analytics" class="nav-item" data-target="analytics"><i class="ti ti-chart-bar"></i> Analytics</a>
+        <div class="nav-section">SETTINGS</div>
+        <a href="#preferences" class="nav-item" data-target="preferences"><i class="ti ti-settings"></i> Preferences</a>
+        <a href="#notifications" class="nav-item" data-target="notifications"><i class="ti ti-bell"></i> Notifications <span id="nav-notif-badge" class="nav-badge" hidden></span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">JB</div>
+          <div class="user-info">
+            <span class="user-name">Jane Doe</span>
+            <span class="user-role">Enterprise Plan</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Navigation -->
+      <header class="topbar">
+        <div class="search-bar">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Search candidates, keywords...">
+          <span class="cmd-key">⌘K</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="topbar-notif-btn" aria-label="Notifications"><i class="ti ti-bell"></i><span class="badge" id="topbar-notif-badge"></span></button>
+          <button class="action-btn-primary"><i class="ti ti-upload"></i> Bulk Import</button>
+        </div>
+      </header>
+
+      <div class="content-scroll">
+<div id="view-dashboard" class="app-view active">
+
+        <div class="dashboard-header">
+          <div class="title-group">
+            <h1>Candidate Extraction</h1>
+            <p>Upload a resume and our AI will automatically structure the core data points.</p>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metric-cards" id="dynamic-dash-metrics"></div>
+
+        <!-- Application Core Area -->
+        <div class="extraction-grid">
+          
+          <!-- Left: Input Area -->
+          <section class="glass-panel input-panel" aria-label="Resume input">
+            <div class="panel-header">
+              <h2><i class="ti ti-file-upload"></i> Extract Resume</h2>
+            </div>
+            
+            <div class="upload-zone" id="dropZone" tabindex="0" role="button" aria-label="Resume upload zone">
+              <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" aria-label="Select file" tabindex="-1" />
+              <div class="upload-icon-wrapper">
+                <i class="ti ti-cloud-upload"></i>
+              </div>
+              <label class="upload-label" for="fileInput">Click to upload or drag and drop</label>
+              <div class="upload-sub">TXT, PDF, DOC, DOCX (max. 10MB)</div>
+            </div>
+            <div id="uploadError" class="field-error" hidden aria-live="polite"></div>
+
+            <div id="filePill" class="file-pill-wrap" hidden>
+              <div class="file-pill-glass">
+                <i class="ti ti-file-text"></i>
+                <span id="fileName"></span>
+                <button class="remove-btn" id="removeFile" aria-label="Remove file"><i class="ti ti-x"></i></button>
+              </div>
+            </div>
+
+            <div class="divider"><span>OR PASTE TEXT</span></div>
+
+            <div class="paste-area">
+              <textarea
+                id="resumeText"
+                placeholder="Paste the raw text of the resume here..."
+                rows="6"
+              ></textarea>
+            </div>
+            <div id="textError" class="field-error" hidden aria-live="polite"></div>
+
+            <div id="errorMsg" class="error-msg" hidden aria-live="polite"></div>
+
+            <button class="analyze-btn" id="analyzeBtn" aria-label="Analyze resume">
+              <span class="btn-text">Extract with AI <i class="ti ti-sparkles"></i></span>
+              <div class="btn-glow"></div>
+            </button>
+
+            <div class="status" id="status" aria-live="polite" aria-atomic="true"></div>
+          </section>
+
+          <!-- Right: Output Area -->
+          <section class="glass-panel results-panel" id="resultsPanel" aria-label="Extracted resume details" hidden>
+            <div class="panel-header">
+              <h2><i class="ti ti-analyze"></i> Extraction Results</h2>
+            </div>
+            <div id="results" class="results-content"></div>
+          </section>
+        </div>
+      
+</div>
+
+<div id="view-resumes" class="app-view" style="display: none;">
+  <div class="dashboard-header flex-header">
+    <div class="title-group">
+      <h1>Resumes Management</h1>
+      <p>View, manage, and batch-parse uploaded resumes.</p>
+    </div>
+    <div class="header-actions">
+       <button class="action-btn-primary"><i class="ti ti-upload"></i> Upload</button>
+    </div>
+  </div>
+
+  <div class="metric-cards mb-32 child-3" id="dynamic-resumes-metrics"></div>
+
+  <div class="glass-panel table-panel">
+    <div class="table-toolbar">
+      <div class="search-bar small"><i class="ti ti-search"></i><input type="text" placeholder="Search by name, skills..."></div>
+      <div class="table-filters">
+        <button class="filter-btn"><i class="ti ti-filter"></i> Filter</button>
+        <button class="filter-btn"><i class="ti ti-sort-descending"></i> Sort</button>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Resume Name</th>
+            <th>Upload Date</th>
+            <th>Status</th>
+            <th>Match Score</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="resumes-table-body"></tbody>
+      </table>
+    </div>
+    
+  </div>
+</div>
+
+
+<div id="view-candidates" class="app-view" style="display: none;">
+  <div class="dashboard-header">
+    <div class="title-group">
+      <h1>Candidate CRM</h1>
+      <p>Manage talent profiles and match scores generated from parsed resumes.</p>
+    </div>
+  </div>
+
+  <div class="metric-cards mb-32 child-4" id="dynamic-candidates-metrics"></div>
+
+  <div class="candidates-grid" id="dynamic-candidates-grid"></div>
+  
+  <!-- Candidate Drawer Profile (Hidden) -->
+  <div id="candidate-drawer" class="drawer-overlay">
+    <div class="drawer-content glass-panel">
+      <button class="close-drawer" onclick="closeCandidateDrawer()"><i class="ti ti-x"></i></button>
+      
+      <div class="drawer-header">
+        <div class="cand-avatar large">AJ</div>
+        <div class="drawer-title">
+          <h2 id="drawer-name">Alex Johnson</h2>
+          <p id="drawer-role">Senior Full-Stack Developer</p>
+        </div>
+        <div class="drawer-actions">
+           <button class="action-btn-primary small"><i class="ti ti-mail"></i> Message</button>
+           <button class="action-btn-secondary small"><i class="ti ti-calendar-event"></i> Schedule</button>
+        </div>
+      </div>
+      
+      <div class="drawer-tabs">
+        <button class="drawer-tab active">Overview</button>
+        <button class="drawer-tab">Resume</button>
+        <button class="drawer-tab">Timeline</button>
+      </div>
+      
+      <div class="drawer-body">
+        <div class="drawer-section">
+          <h3>Summary</h3>
+          <p>Highly experienced Full-Stack Developer specializing in React and Node.js microservices. Proven track record of scaling backend infrastructure and leading front-end architectural decisions for SaaS platforms.</p>
+        </div>
+        
+        <div class="drawer-section">
+          <h3>Extracted Skills</h3>
+          <div class="skills-row">
+            <span class="skill-pill">React</span><span class="skill-pill">Node.js</span><span class="skill-pill">AWS</span>
+            <span class="skill-pill">TypeScript</span><span class="skill-pill">GraphQL</span><span class="skill-pill">PostgreSQL</span>
+          </div>
+        </div>
+
+        <div class="drawer-section">
+          <h3>Experience Timeline</h3>
+          <div class="timeline-list">
+            <div class="timeline-entry">
+              <div class="timeline-marker"><div class="timeline-dot"></div></div>
+              <div>
+                 <div class="timeline-title">Senior Software Engineer</div>
+                 <div class="timeline-role">TechCorp Inc. (2021 - Present)</div>
+              </div>
+            </div>
+            <div class="timeline-entry">
+              <div class="timeline-marker"><div class="timeline-dot"></div></div>
+              <div>
+                 <div class="timeline-title">Software Engineer</div>
+                 <div class="timeline-role">WebSolutions LLC (2018 - 2021)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="view-analytics" class="app-view" style="display: none;">
+  <div class="dashboard-header flex-header">
+    <div class="title-group">
+      <h1>Analytics & Insights</h1>
+      <p>Performance metrics and demographic distributions.</p>
+    </div>
+    <div class="header-actions">
+       <div class="date-picker">Last 30 Days <i class="ti ti-chevron-down"></i></div>
+       <button class="action-btn-secondary"><i class="ti ti-download"></i> Export</button>
+    </div>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="metric-cards mb-32 child-4" id="dynamic-analytics-metrics"></div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid" id="dynamic-analytics-charts"></div>
+</div>
+
+<!-- ===== PREFERENCES VIEW ===== -->
+<div id="view-preferences" class="app-view" style="display: none;">
+  <div class="dashboard-header">
+    <div class="title-group">
+      <h1>Preferences</h1>
+      <p>Manage your profile, appearance, account security, and application settings.</p>
+    </div>
+  </div>
+
+  <!-- Preferences Tabs -->
+  <div class="pref-tabs" id="pref-tabs">
+    <button class="pref-tab active" data-pref-tab="profile"><i class="ti ti-user"></i> Profile</button>
+    <button class="pref-tab" data-pref-tab="appearance"><i class="ti ti-palette"></i> Appearance</button>
+    <button class="pref-tab" data-pref-tab="account"><i class="ti ti-shield-lock"></i> Account</button>
+    <button class="pref-tab" data-pref-tab="application"><i class="ti ti-adjustments-horizontal"></i> Application</button>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div id="pref-panel-profile" class="pref-panel active">
+    <div class="glass-panel pref-card">
+      <div class="pref-card-header">
+        <h3><i class="ti ti-user-circle"></i> Personal Information</h3>
+        <span class="pref-autosave-badge"><i class="ti ti-cloud-check"></i> Auto-saved</span>
+      </div>
+      <div class="pref-avatar-section">
+        <div class="pref-avatar-large" id="pref-avatar-display">JD</div>
+        <div class="pref-avatar-actions">
+          <button class="action-btn-secondary small" id="pref-change-avatar"><i class="ti ti-camera"></i> Change Avatar</button>
+          <span class="pref-avatar-hint">Avatar is generated from your initials</span>
+        </div>
+      </div>
+      <div class="pref-form-grid">
+        <div class="pref-field">
+          <label for="pref-fullname">Full Name</label>
+          <input type="text" id="pref-fullname" placeholder="Jane Doe" />
+        </div>
+        <div class="pref-field">
+          <label for="pref-email">Email Address</label>
+          <input type="email" id="pref-email" placeholder="jane@example.com" />
+        </div>
+        <div class="pref-field">
+          <label for="pref-jobtitle">Job Title</label>
+          <input type="text" id="pref-jobtitle" placeholder="HR Manager" />
+        </div>
+        <div class="pref-field">
+          <label for="pref-company">Company</label>
+          <input type="text" id="pref-company" placeholder="Acme Corp" />
+        </div>
+        <div class="pref-field full-width">
+          <label for="pref-bio">Bio</label>
+          <textarea id="pref-bio" rows="3" placeholder="Tell us a little about yourself..."></textarea>
+        </div>
+      </div>
+      <div class="pref-actions">
+        <button class="analyze-btn pref-save-btn" id="pref-save-profile"><i class="ti ti-device-floppy"></i> Save Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPEARANCE TAB -->
+  <div id="pref-panel-appearance" class="pref-panel">
+    <div class="glass-panel pref-card">
+      <div class="pref-card-header">
+        <h3><i class="ti ti-palette"></i> Theme & Display</h3>
+      </div>
+      <div class="pref-section">
+        <div class="pref-section-title">Color Theme</div>
+        <div class="theme-picker" id="theme-picker">
+          <button class="theme-option active" data-theme="dark">
+            <div class="theme-preview dark-preview"></div>
+            <span>Dark</span>
+            <i class="ti ti-circle-check theme-check"></i>
+          </button>
+          <button class="theme-option" data-theme="light">
+            <div class="theme-preview light-preview"></div>
+            <span>Light</span>
+            <i class="ti ti-circle-check theme-check"></i>
+          </button>
+          <button class="theme-option" data-theme="midnight">
+            <div class="theme-preview midnight-preview"></div>
+            <span>Midnight</span>
+            <i class="ti ti-circle-check theme-check"></i>
+          </button>
+          <button class="theme-option" data-theme="ocean">
+            <div class="theme-preview ocean-preview"></div>
+            <span>Ocean</span>
+            <i class="ti ti-circle-check theme-check"></i>
+          </button>
+        </div>
+      </div>
+      <div class="pref-section">
+        <div class="pref-section-title">Accent Color</div>
+        <div class="accent-picker" id="accent-picker">
+          <button class="accent-dot active" data-accent="indigo" style="--dot-color:#6366F1;"></button>
+          <button class="accent-dot" data-accent="blue" style="--dot-color:#3B82F6;"></button>
+          <button class="accent-dot" data-accent="cyan" style="--dot-color:#06B6D4;"></button>
+          <button class="accent-dot" data-accent="emerald" style="--dot-color:#10B981;"></button>
+          <button class="accent-dot" data-accent="rose" style="--dot-color:#F43F5E;"></button>
+          <button class="accent-dot" data-accent="amber" style="--dot-color:#F59E0B;"></button>
+        </div>
+      </div>
+      <div class="pref-section">
+        <div class="pref-section-title">Font Size</div>
+        <div class="font-size-control">
+          <button class="font-size-btn" id="font-decrease"><i class="ti ti-minus"></i></button>
+          <span class="font-size-value" id="font-size-display">15px</span>
+          <button class="font-size-btn" id="font-increase"><i class="ti ti-plus"></i></button>
+        </div>
+      </div>
+      <div class="pref-toggle-row">
+        <div class="pref-toggle-info">
+          <span class="pref-toggle-label">Reduce Animations</span>
+          <span class="pref-toggle-desc">Minimize motion for accessibility</span>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="pref-reduce-motion" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="pref-toggle-row">
+        <div class="pref-toggle-info">
+          <span class="pref-toggle-label">Compact Mode</span>
+          <span class="pref-toggle-desc">Reduce spacing for denser layouts</span>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="pref-compact-mode" /><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT TAB -->
+  <div id="pref-panel-account" class="pref-panel">
+    <div class="glass-panel pref-card">
+      <div class="pref-card-header">
+        <h3><i class="ti ti-shield-lock"></i> Security & API</h3>
+      </div>
+      <div class="pref-section">
+        <div class="pref-section-title">Change Password</div>
+        <div class="pref-form-grid">
+          <div class="pref-field">
+            <label for="pref-current-pw">Current Password</label>
+            <div class="password-wrap">
+              <input type="password" id="pref-current-pw" placeholder="••••••••" />
+              <button class="pw-toggle" data-target="pref-current-pw"><i class="ti ti-eye"></i></button>
+            </div>
+          </div>
+          <div class="pref-field">
+            <label for="pref-new-pw">New Password</label>
+            <div class="password-wrap">
+              <input type="password" id="pref-new-pw" placeholder="••••••••" />
+              <button class="pw-toggle" data-target="pref-new-pw"><i class="ti ti-eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="pref-actions" style="margin-top:16px;">
+          <button class="action-btn-primary" id="pref-update-pw"><i class="ti ti-lock"></i> Update Password</button>
+        </div>
+      </div>
+      <div class="pref-divider"></div>
+      <div class="pref-section">
+        <div class="pref-section-title">API Configuration</div>
+        <div class="pref-form-grid">
+          <div class="pref-field full-width">
+            <label for="pref-api-key">Groq API Key</label>
+            <div class="password-wrap">
+              <input type="password" id="pref-api-key" placeholder="gsk_xxxxxxxxxxxxx" />
+              <button class="pw-toggle" data-target="pref-api-key"><i class="ti ti-eye"></i></button>
+            </div>
+            <span class="pref-field-hint">Get your key from <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></span>
+          </div>
+          <div class="pref-field full-width">
+            <label for="pref-model-select">AI Model</label>
+            <select id="pref-model-select">
+              <option value="llama-3.3-70b-versatile">LLaMA 3.3 70B Versatile</option>
+              <option value="llama-3.1-8b-instant">LLaMA 3.1 8B Instant</option>
+              <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+              <option value="gemma2-9b-it">Gemma 2 9B</option>
+            </select>
+          </div>
+        </div>
+        <div class="pref-actions" style="margin-top:16px;">
+          <button class="analyze-btn pref-save-btn" id="pref-save-api"><i class="ti ti-device-floppy"></i> Save API Settings</button>
+        </div>
+      </div>
+      <div class="pref-divider"></div>
+      <div class="pref-section">
+        <div class="pref-section-title danger-title"><i class="ti ti-alert-triangle"></i> Danger Zone</div>
+        <div class="danger-zone">
+          <div class="danger-item">
+            <div>
+              <strong>Clear All Data</strong>
+              <p>Permanently delete all parsed resumes, candidates, and analytics from local storage.</p>
+            </div>
+            <button class="danger-btn" id="pref-clear-data"><i class="ti ti-trash"></i> Clear Data</button>
+          </div>
+          <div class="danger-item">
+            <div>
+              <strong>Reset Preferences</strong>
+              <p>Restore all settings back to factory defaults.</p>
+            </div>
+            <button class="danger-btn" id="pref-reset-all"><i class="ti ti-refresh"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION TAB -->
+  <div id="pref-panel-application" class="pref-panel">
+    <div class="glass-panel pref-card">
+      <div class="pref-card-header">
+        <h3><i class="ti ti-adjustments-horizontal"></i> Application Behavior</h3>
+      </div>
+      <div class="pref-toggle-row">
+        <div class="pref-toggle-info">
+          <span class="pref-toggle-label">Auto-save Parsed Resumes</span>
+          <span class="pref-toggle-desc">Automatically save every parsed resume to the database</span>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="pref-autosave" checked /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="pref-toggle-row">
+        <div class="pref-toggle-info">
+          <span class="pref-toggle-label">Desktop Notifications</span>
+          <span class="pref-toggle-desc">Show browser notification popups for important events</span>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="pref-desktop-notifs" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="pref-toggle-row">
+        <div class="pref-toggle-info">
+          <span class="pref-toggle-label">Sound Effects</span>
+          <span class="pref-toggle-desc">Play a chime on successful resume parse</span>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="pref-sounds" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="pref-toggle-row">
+        <div class="pref-toggle-info">
+          <span class="pref-toggle-label">Show Match Scores</span>
+          <span class="pref-toggle-desc">Display AI-generated match scores on candidate cards</span>
+        </div>
+        <label class="toggle-switch"><input type="checkbox" id="pref-show-scores" checked /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="pref-section" style="margin-top:24px;">
+        <div class="pref-section-title">Default Parser Temperature</div>
+        <div class="range-control">
+          <input type="range" id="pref-temperature" min="0" max="100" value="10" />
+          <span class="range-value" id="pref-temp-display">0.10</span>
+        </div>
+        <span class="pref-field-hint">Lower = more precise extractions, higher = more creative</span>
+      </div>
+      <div class="pref-section" style="margin-top:24px;">
+        <div class="pref-section-title">Max Resume Length (characters)</div>
+        <div class="pref-form-grid">
+          <div class="pref-field">
+            <input type="number" id="pref-max-chars" value="15000" min="1000" max="100000" step="1000" />
+          </div>
+        </div>
+        <span class="pref-field-hint">Resumes longer than this will be truncated before parsing</span>
+      </div>
+      <div class="pref-actions" style="margin-top:24px;">
+        <button class="analyze-btn pref-save-btn" id="pref-save-app"><i class="ti ti-device-floppy"></i> Save Application Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NOTIFICATIONS VIEW ===== -->
+<div id="view-notifications" class="app-view" style="display: none;">
+  <div class="dashboard-header flex-header">
+    <div class="title-group">
+      <h1>Notifications</h1>
+      <p>Stay updated on resume processing, candidate updates, and system events.</p>
+    </div>
+    <div class="header-actions">
+      <button class="action-btn-secondary" id="notif-mark-all-read"><i class="ti ti-checks"></i> Mark All Read</button>
+      <button class="action-btn-secondary" id="notif-clear-all"><i class="ti ti-trash"></i> Clear All</button>
+    </div>
+  </div>
+
+  <!-- Notification Filters -->
+  <div class="notif-filters" id="notif-filters">
+    <button class="notif-filter-btn active" data-filter="all">All <span class="notif-filter-count" id="notif-count-all">0</span></button>
+    <button class="notif-filter-btn" data-filter="unread">Unread <span class="notif-filter-count" id="notif-count-unread">0</span></button>
+    <button class="notif-filter-btn" data-filter="upload"><i class="ti ti-upload"></i> Uploads</button>
+    <button class="notif-filter-btn" data-filter="parse"><i class="ti ti-sparkles"></i> Parsing</button>
+    <button class="notif-filter-btn" data-filter="candidate"><i class="ti ti-user"></i> Candidates</button>
+    <button class="notif-filter-btn" data-filter="system"><i class="ti ti-settings"></i> System</button>
+  </div>
+
+  <!-- Notification List -->
+  <div class="notif-list" id="notif-list"></div>
+</div>
+
+</div>
+
+</div>
+    </main>
+  </div>
+
+  <!-- AI Chatbot -->
+  <button id="chat-fab" class="chat-fab" aria-label="Open AI Assistant">
+    <i class="ti ti-message-chatbot chat-fab-icon"></i>
+    <i class="ti ti-x chat-fab-close"></i>
+    <span class="chat-fab-pulse"></span>
+  </button>
+
+  <div id="chat-window" class="chat-window" hidden>
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-ai-avatar"><i class="ti ti-sparkles"></i></div>
+        <div>
+          <div class="chat-header-title">HireFlow AI</div>
+          <div class="chat-header-status"><span class="chat-status-dot"></span> Online</div>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button id="chat-clear" class="chat-header-btn" title="Clear chat"><i class="ti ti-trash"></i></button>
+        <button id="chat-close" class="chat-header-btn" title="Close"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+
+    <div id="chat-messages" class="chat-messages">
+      <div class="chat-welcome">
+        <div class="chat-welcome-icon"><i class="ti ti-robot"></i></div>
+        <h3>Hi! I'm your AI Copilot</h3>
+        <p>I can help with resume analysis, ATS scores, interview prep, candidate comparison, and more.</p>
+      </div>
+      <div class="chat-prompts" id="chat-prompts">
+        <button class="chat-prompt-btn" data-prompt="Analyze my latest uploaded resume"><i class="ti ti-file-analytics"></i> Analyze my resume</button>
+        <button class="chat-prompt-btn" data-prompt="How can I improve my ATS score?"><i class="ti ti-chart-arrows-vertical"></i> Improve ATS score</button>
+        <button class="chat-prompt-btn" data-prompt="Generate 5 technical interview questions for a senior developer role"><i class="ti ti-help-octagon"></i> Interview questions</button>
+        <button class="chat-prompt-btn" data-prompt="Compare the top candidates in my database by skills and experience"><i class="ti ti-users"></i> Compare candidates</button>
+        <button class="chat-prompt-btn" data-prompt="What skills are most in-demand for software engineers right now?"><i class="ti ti-bulb"></i> Skill gap analysis</button>
+        <button class="chat-prompt-btn" data-prompt="Give me tips to improve this resume for a product manager role"><i class="ti ti-pencil"></i> Resume improvement</button>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea id="chat-input" class="chat-input" placeholder="Ask HireFlow AI anything..." rows="1"></textarea>
+      <button id="chat-send" class="chat-send-btn" disabled><i class="ti ti-send"></i></button>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Background decorative elements -->
+  <div class="bg-shape shape-1"></div>
+  <div class="bg-shape shape-2"></div>
+  <div class="bg-shape shape-3"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
