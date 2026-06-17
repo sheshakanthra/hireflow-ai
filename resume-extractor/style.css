@@ -8,7 +8,7 @@
   --border-glass-hover: rgba(255, 255, 255, 0.15);
 
   --text-main: #F8FAFC;
-  --text-muted: #94A3B8;
+  --text-muted: #B0BEC5;
 
   --grad-primary: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
   --grad-accent: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
@@ -348,9 +348,10 @@ body {
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  background: linear-gradient(to right, #FFF, #94A3B8);
+  background: linear-gradient(to right, #FFFFFF, #E2E8F0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 8px;
 }
 
@@ -417,7 +418,7 @@ body {
 .metric-label {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: #CBD5E1;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -3089,5 +3090,350 @@ body {
     width: 52px;
     height: 52px;
     font-size: 24px;
-  }
 }
+
+/* =========================================
+   JOBSENSE CAREER INTELLIGENCE
+   ========================================= */
+.jobsense-panel {
+  margin-top: 32px;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.jobsense-panel:not([hidden]) {
+  display: block;
+}
+.jobsense-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.jobsense-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #06B6D4, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.jobsense-desc {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.jobsense-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.jobsense-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.jobsense-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(6, 182, 212, 0.08));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.jobsense-btn:hover::before {
+  opacity: 1;
+}
+.jobsense-btn:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+}
+.jobsense-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+.jobsense-btn i {
+  font-size: 28px;
+  color: #818CF8;
+  position: relative;
+  z-index: 1;
+}
+.jobsense-btn:nth-child(2) i {
+  color: #22D3EE;
+}
+.jobsense-btn:nth-child(3) i {
+  color: #A78BFA;
+}
+.jobsense-btn-title {
+  font-size: 15px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+.jobsense-btn-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 1;
+}
+.jobsense-btn.active {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* JobSense Results */
+.jobsense-result {
+  animation: fadeIn 0.3s ease;
+}
+.jobsense-result:not([hidden]) {
+  display: block;
+}
+.jobsense-result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.jobsense-result-header i {
+  color: #818CF8;
+  font-size: 18px;
+}
+.jobsense-loading {
+  text-align: center;
+  padding: 48px 20px;
+}
+.jobsense-loading .spinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  margin: 0 auto 16px;
+}
+.jobsense-loading-text {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Market Pulse Card */
+.market-pulse-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.market-pulse-item {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+}
+.market-pulse-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.market-pulse-label i {
+  font-size: 14px;
+  color: #22D3EE;
+}
+.market-pulse-value {
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+.market-pulse-item.full-width {
+  grid-column: 1 / -1;
+}
+.demand-high {
+  color: #10B981;
+  font-weight: 700;
+}
+.demand-medium {
+  color: #F59E0B;
+  font-weight: 700;
+}
+.demand-low {
+  color: #EF4444;
+  font-weight: 700;
+}
+
+/* Job Listing Cards */
+.job-listing-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.job-listing-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+.job-listing-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.job-listing-company {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFF;
+}
+.job-listing-role {
+  font-size: 14px;
+  color: #818CF8;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.job-listing-location {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.job-listing-fit {
+  font-size: 13px;
+  color: #CBD5E1;
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(99, 102, 241, 0.05);
+  border-left: 3px solid #818CF8;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 12px;
+}
+.job-listing-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.job-listing-apply {
+  font-size: 13px;
+  font-weight: 600;
+  color: #818CF8;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+.job-listing-apply:hover {
+  color: #A5B4FC;
+}
+.job-listing-recruiter {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.job-listing-number {
+  font-size: 11px;
+  font-weight: 700;
+  color: #818CF8;
+  background: rgba(99, 102, 241, 0.1);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Outreach Email */
+.outreach-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.outreach-meta {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.outreach-meta-row {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+.outreach-meta-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 60px;
+}
+.outreach-meta-value {
+  color: var(--text-main);
+  font-weight: 500;
+}
+.outreach-body {
+  padding: 20px;
+  font-size: 14px;
+  color: #CBD5E1;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.outreach-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-glass);
+  background: rgba(99, 102, 241, 0.03);
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 24px;
+}
+.outreach-footer i {
+  color: #818CF8;
+  margin-right: 4px;
+}
+.outreach-copy-btn {
+  margin-top: 12px;
+  padding: 10px 20px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-sm);
+  color: #818CF8;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.outreach-copy-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+@media (max-width: 768px) {
+  .jobsense-actions {
+    grid-template-columns: 1fr;
+  }
+  .market-pulse-grid {
+    grid-template-columns: 1fr;
+  }
+}

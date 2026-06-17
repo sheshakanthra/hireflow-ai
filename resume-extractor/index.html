@@ -141,6 +141,33 @@
             </section>
           </div>
 
+          <!-- JobSense Career Intelligence -->
+          <section class="glass-panel jobsense-panel" id="jobsensePanel" hidden>
+            <div class="panel-header jobsense-header">
+              <h2><i class="ti ti-radar"></i> JobSense <span class="jobsense-badge">Career Intelligence</span></h2>
+            </div>
+            <p class="jobsense-desc">AI-powered career insights based on the analyzed resume. Choose an action below.</p>
+            <div class="jobsense-actions">
+              <button class="jobsense-btn" id="js-market-scan" data-mode="market">
+                <i class="ti ti-chart-dots-3"></i>
+                <span class="jobsense-btn-title">Market Scan</span>
+                <span class="jobsense-btn-sub">Demand, trends & hot stacks</span>
+              </button>
+              <button class="jobsense-btn" id="js-job-discovery" data-mode="jobs">
+                <i class="ti ti-briefcase-2"></i>
+                <span class="jobsense-btn-title">Job Discovery</span>
+                <span class="jobsense-btn-sub">Matching open roles</span>
+              </button>
+              <button class="jobsense-btn" id="js-auto-apply" data-mode="outreach">
+                <i class="ti ti-mail-forward"></i>
+                <span class="jobsense-btn-title">Auto-Apply</span>
+                <span class="jobsense-btn-sub">Draft cold outreach email</span>
+              </button>
+            </div>
+            <div id="jobsenseResult" class="jobsense-result" hidden></div>
+          </section>
+
+
         </div>
 
         <div id="view-resumes" class="app-view" style="display: none;">

@@ -24,6 +24,7 @@ const resultsPanel = document.getElementById('resultsPanel');
 const resultsEl    = document.getElementById('results');
 
 let fileContent = '';
+let lastParsedResume = null;
 
 function apiKey() {
   return (typeof localStorage !== 'undefined' && localStorage.getItem('groq_api_key'))
@@ -527,6 +528,8 @@ analyzeBtn.addEventListener('click', async () => {
     const pd = JSON.parse(jsonMatch[0]);
     renderResults(pd);
     saveDbResume(pd);
+    lastParsedResume = pd;
+    showJobSensePanel();
   } catch (err) {
     console.error('[ResumeAI] Analysis error:', err);
 
@@ -1617,12 +1620,252 @@ function initChatbot() {
   loadHistory();
 }
 
+// ==========================================
+// JOBSENSE CAREER INTELLIGENCE ENGINE
+// ==========================================
+
+function showJobSensePanel() {
+  const panel = document.getElementById('jobsensePanel');
+  if (panel) {
+    panel.hidden = false;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+const JOBSENSE_PROMPTS = {
+  market: (resumeJSON) => `You are JobSense, an elite career intelligence agent.
+
+Analyze the current job market for the candidate whose resume data is below. Return ONLY a valid JSON object with this exact shape:
+{
+  "demand_level": "HIGH or MEDIUM or LOW",
+  "candidate_domain": "the domain/field",
+  "hottest_stacks": ["stack1", "stack2", "stack3", "stack4", "stack5"],
+  "top_roles": ["role1", "role2", "role3", "role4", "role5"],
+  "red_flags": ["warning1", "warning2"],
+  "best_platforms": ["platform1", "platform2", "platform3"],
+  "summary": "2-3 sentence market outlook for this candidate"
+}
+
+Resume data:
+${JSON.stringify(resumeJSON)}`,
+
+  jobs: (resumeJSON) => `You are JobSense, a job discovery agent.
+
+Find 5 realistic, plausible job listings that would be a strong match for this candidate. Base suggestions on real companies that typically hire for these roles. Return ONLY a valid JSON array:
+[
+  {
+    "company": "Company Name",
+    "role": "Job Title",
+    "location": "City, Country or Remote",
+    "why_it_fits": "One sentence explaining match to candidate skills",
+    "search_query": "LinkedIn search query string to find this role",
+    "recruiter": "[RESEARCH NEEDED]"
+  }
+]
+
+Resume data:
+${JSON.stringify(resumeJSON)}`,
+
+  outreach: (resumeJSON) => `You are JobSense, a cold outreach specialist.
+
+Draft a compelling cold outreach email from this candidate to a hiring manager at a company that would be a great fit. Return ONLY a valid JSON object:
+{
+  "to": "Hiring Manager at [Best-fit Company]",
+  "subject": "Specific email subject line",
+  "body": "The full email body - 4 paragraphs max, personal, direct, references specific skills from resume",
+  "follow_up_days": 5,
+  "best_channel": "Email / LinkedIn DM / Both"
+}
+
+Resume data:
+${JSON.stringify(resumeJSON)}`
+};
+
+function renderJobSenseLoading(mode) {
+  const labels = { market: 'Scanning market trends...', jobs: 'Discovering matching roles...', outreach: 'Crafting outreach email...' };
+  const resultEl = document.getElementById('jobsenseResult');
+  resultEl.hidden = false;
+  resultEl.innerHTML = `
+    <div class="jobsense-loading">
+      <div class="spinner"></div>
+      <div class="jobsense-loading-text">${labels[mode] || 'Processing...'}</div>
+    </div>`;
+}
+
+function renderMarketPulse(data) {
+  const demandClass = (data.demand_level || '').toLowerCase();
+  return `
+    <div class="jobsense-result-header"><i class="ti ti-chart-dots-3"></i> Market Pulse</div>
+    <div class="market-pulse-grid">
+      <div class="market-pulse-item">
+        <div class="market-pulse-label"><i class="ti ti-activity"></i> Demand Level</div>
+        <div class="market-pulse-value"><span class="demand-${demandClass}">${esc(data.demand_level || 'N/A')}</span> for ${esc(data.candidate_domain || 'this domain')}</div>
+      </div>
+      <div class="market-pulse-item">
+        <div class="market-pulse-label"><i class="ti ti-flame"></i> Hottest Stacks</div>
+        <div class="market-pulse-value">${(data.hottest_stacks || []).map(s => `<span class="skill-pill">${esc(s)}</span>`).join(' ')}</div>
+      </div>
+      <div class="market-pulse-item">
+        <div class="market-pulse-label"><i class="ti ti-briefcase"></i> Top Open Roles</div>
+        <div class="market-pulse-value">${(data.top_roles || []).map(r => `<div>→ ${esc(r)}</div>`).join('')}</div>
+      </div>
+      <div class="market-pulse-item">
+        <div class="market-pulse-label"><i class="ti ti-devices"></i> Best Platforms</div>
+        <div class="market-pulse-value">${(data.best_platforms || []).join(', ')}</div>
+      </div>
+      <div class="market-pulse-item full-width">
+        <div class="market-pulse-label"><i class="ti ti-alert-triangle"></i> Red Flags</div>
+        <div class="market-pulse-value">${(data.red_flags || []).map(f => `<div>⚠ ${esc(f)}</div>`).join('') || 'None identified'}</div>
+      </div>
+      <div class="market-pulse-item full-width">
+        <div class="market-pulse-label"><i class="ti ti-bulb"></i> Market Outlook</div>
+        <div class="market-pulse-value">${esc(data.summary || '')}</div>
+      </div>
+    </div>`;
+}
+
+function renderJobListings(jobs) {
+  const cards = (jobs || []).map((job, i) => `
+    <div class="job-listing-card">
+      <div class="job-listing-top">
+        <div>
+          <div class="job-listing-company">${esc(job.company)}</div>
+          <div class="job-listing-role">${esc(job.role)}</div>
+          <div class="job-listing-location"><i class="ti ti-map-pin"></i> ${esc(job.location)}</div>
+        </div>
+        <div class="job-listing-number">${i + 1}</div>
+      </div>
+      <div class="job-listing-fit">${esc(job.why_it_fits)}</div>
+      <div class="job-listing-footer">
+        <a class="job-listing-apply" href="https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(job.search_query || job.role + ' ' + job.company)}" target="_blank" rel="noopener">
+          <i class="ti ti-external-link"></i> Search on LinkedIn
+        </a>
+        <span class="job-listing-recruiter"><i class="ti ti-user"></i> ${esc(job.recruiter || '[RESEARCH NEEDED]')}</span>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="jobsense-result-header"><i class="ti ti-briefcase-2"></i> Matching Roles (${jobs.length})</div>
+    ${cards}`;
+}
+
+function renderOutreach(data) {
+  return `
+    <div class="jobsense-result-header"><i class="ti ti-mail-forward"></i> Outreach Draft</div>
+    <div class="outreach-card">
+      <div class="outreach-meta">
+        <div class="outreach-meta-row"><span class="outreach-meta-label">To:</span><span class="outreach-meta-value">${esc(data.to)}</span></div>
+        <div class="outreach-meta-row"><span class="outreach-meta-label">Subject:</span><span class="outreach-meta-value">${esc(data.subject)}</span></div>
+      </div>
+      <div class="outreach-body">${esc(data.body)}</div>
+      <div class="outreach-footer">
+        <span><i class="ti ti-clock"></i> Follow up in ${data.follow_up_days || 5} days</span>
+        <span><i class="ti ti-send"></i> Best via: ${esc(data.best_channel || 'Email')}</span>
+      </div>
+    </div>
+    <button class="outreach-copy-btn" id="js-copy-outreach"><i class="ti ti-copy"></i> Copy Email to Clipboard</button>`;
+}
+
+async function runJobSense(mode) {
+  if (!lastParsedResume) {
+    showToast('No Resume', 'Analyze a resume first before using JobSense.', 'warning');
+    return;
+  }
+
+  const key = apiKey();
+  if (!key || key === 'YOUR_GROQ_API_KEY_HERE') {
+    showToast('API Key Required', 'Go to Preferences → Account and add your Groq API key.', 'warning');
+    return;
+  }
+
+  // Disable all buttons during request
+  document.querySelectorAll('.jobsense-btn').forEach(b => { b.disabled = true; });
+  document.querySelectorAll('.jobsense-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(`.jobsense-btn[data-mode="${mode}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  renderJobSenseLoading(mode);
+
+  try {
+    const prompt = JOBSENSE_PROMPTS[mode](lastParsedResume);
+    const prefs = getPrefs();
+    const model = prefs.account?.model || GROQ_MODEL;
+
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3,
+        max_completion_tokens: 2048,
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new ApiError(err.error?.message || `API error ${resp.status}`, resp.status, err.error || {});
+    }
+
+    const d = await resp.json();
+    const raw = d.choices?.[0]?.message?.content || '';
+    const jsonMatch = raw.match(/[\[\{][\s\S]*[\]\}]/);
+    if (!jsonMatch) throw new Error('No valid JSON in response');
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    const resultEl = document.getElementById('jobsenseResult');
+
+    if (mode === 'market') {
+      resultEl.innerHTML = renderMarketPulse(parsed);
+    } else if (mode === 'jobs') {
+      const jobs = Array.isArray(parsed) ? parsed : (parsed.jobs || parsed.job_listings || [parsed]);
+      resultEl.innerHTML = renderJobListings(jobs);
+    } else if (mode === 'outreach') {
+      resultEl.innerHTML = renderOutreach(parsed);
+      // Attach copy handler
+      document.getElementById('js-copy-outreach')?.addEventListener('click', async () => {
+        const text = `To: ${parsed.to}\nSubject: ${parsed.subject}\n\n${parsed.body}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('Copied!', 'Outreach email copied to clipboard.', 'success');
+        } catch(e) { console.error('Copy failed', e); }
+      });
+    }
+
+    resultEl.hidden = false;
+    showToast('JobSense', `${mode === 'market' ? 'Market scan' : mode === 'jobs' ? 'Job discovery' : 'Outreach draft'} complete!`, 'success');
+
+  } catch (err) {
+    console.error('[JobSense] Error:', err);
+    const resultEl = document.getElementById('jobsenseResult');
+    const msg = err.name === 'ApiError' ? formatApiError(err) : (err.message || 'Something went wrong.');
+    resultEl.innerHTML = `<div class="chat-error"><i class="ti ti-alert-circle"></i> ${esc(msg)}</div>`;
+    resultEl.hidden = false;
+  } finally {
+    document.querySelectorAll('.jobsense-btn').forEach(b => { b.disabled = false; });
+  }
+}
+
+function initJobSense() {
+  document.querySelectorAll('.jobsense-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      if (mode) runJobSense(mode);
+    });
+  });
+}
+
 // Call on startup
 document.addEventListener('DOMContentLoaded', () => {
    renderAllData();
    initPreferences();
    initNotifications();
    initChatbot();
+   initJobSense();
    // Seed a welcome notification if brand new
    if (getNotifications().length === 0) {
      addNotification('system', 'Welcome to HireFlow AI', 'Your workspace is ready. Upload a resume to get started!');
